@@ -209,19 +209,27 @@ export default function DropshipCalculator() {
         )}
 
         {/* Graph */}
-        {activeTab === "graph" && chartData.length > 0 && (
-          <div style={{ ...cardStyle, borderRadius: 24, padding: 28 }}>
-            <ResponsiveContainer width="100%" height={260}>
-              <LineChart data={chartData}>
-                <XAxis dataKey="adCost" />
-                <YAxis />
-                <Tooltip />
-                <Line type="monotone" dataKey="profit" stroke="#22c55e" strokeWidth={3} />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        )}
-      </motion.div>
-    </div>
-  );
-}
+{activeTab === "graph" && chartData.length > 0 && (
+  <div style={{ ...cardStyle, borderRadius: 24, padding: 28 }}>
+    <h3 style={{ marginBottom: 10 }}>Profit vs Advertising Cost</h3>
+
+    <p style={{ opacity: 0.7, marginBottom: 16 }}>
+      <strong>X-axis:</strong> Advertising Cost per Order &nbsp; | &nbsp;
+      <strong>Y-axis:</strong> Net Profit per Order
+    </p>
+
+    <ResponsiveContainer width="100%" height={260}>
+      <LineChart data={chartData}>
+        <XAxis
+          dataKey="adCost"
+          label={{ value: "Ad Cost", position: "insideBottom", offset: -5 }}
+        />
+        <YAxis
+          label={{ value: "Profit", angle: -90, position: "insideLeft" }}
+        />
+        <Tooltip />
+        <Line type="monotone" dataKey="profit" stroke="#22c55e" strokeWidth={3} />
+      </LineChart>
+    </ResponsiveContainer>
+  </div>
+)}
