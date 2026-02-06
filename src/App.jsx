@@ -83,9 +83,9 @@ export default function DropshipCalculator() {
     borderRadius: 20,
     maxWidth: 620,
     margin: "40px auto",
-    boxShadow: "0 20px 50px rgba(0,0,0,0.15)",
+    boxShadow: "0 10px 25px rgba(0,0,0,0.12)",
     border: "1px solid #22c55e33",
-    transition: "transform 0.3s ease, box-shadow 0.3s ease"
+    transition: "transform 0.35s cubic-bezier(.2,.8,.2,1), box-shadow 0.35s cubic-bezier(.2,.8,.2,1)"
   };
 
   const input = {
@@ -144,8 +144,14 @@ export default function DropshipCalculator() {
     <div style={{ minHeight: "100vh", padding: 20, ...theme }}>
       <div
         style={card}
-        onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-4px)")}
-        onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.transform = "translateY(-10px) scale(1.01)";
+          e.currentTarget.style.boxShadow = "0 25px 60px rgba(0,0,0,0.18)";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = "translateY(0) scale(1)";
+          e.currentTarget.style.boxShadow = "0 10px 25px rgba(0,0,0,0.12)";
+        }}
       >
         {/* Header */}
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
