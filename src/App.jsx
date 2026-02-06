@@ -99,10 +99,38 @@ export default function DropshipCalculator() {
   };
 
   const stats = [
-    { label: "Profit", value: profit, prefix: currency },
-    { label: "Margin", value: margin, suffix: "%" },
-    { label: "ROAS", value: roas, suffix: "x" }
+    { label: "Profit", value: Number(profit) || 0, prefix: currency },
+    { label: "Margin", value: Number(margin) || 0, suffix: "%" },
+    { label: "ROAS", value: Number(roas) || 0, suffix: "x" },
+    { label: "Daily Profit", value: Number(dailyProfit) || 0, prefix: currency }
   ];
+
+  // counting animation hook
+  const useCountUp = (target) => {
+    const [count, setCount] = useState(0);
+
+    useEffect(() => {
+      let start = 0;
+      const duration = 800;
+      const stepTime = 16;
+      const steps = duration / stepTime;
+      const increment = target / steps;
+
+      const timer = setInterval(() => {
+        start += increment;
+        if (start >= target) {
+          setCount(target);
+          clearInterval(timer);
+        } else {
+          setCount(start);
+        }
+      }, stepTime);
+
+      return () => clearInterval(timer);
+    }, [target]);
+
+    return count.toFixed(2);
+  };
 
   const totalBaseCost =
     Number(productCost) + Number(shippingCost) + Number(fees) + Number(adsCost);
@@ -131,14 +159,17 @@ export default function DropshipCalculator() {
       {/* STAT CARDS */}
       {profit !== null && (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(140px,1fr))", gap: 16, marginBottom: 20 }}>
-          {stats.map((s) => (
-            <div key={s.label} style={statCard} onMouseEnter={liftHover} onMouseLeave={liftLeave}>
-              <div style={{ fontSize: 14, opacity: 0.7 }}>{s.label}</div>
-              <div style={{ fontSize: 22, fontWeight: "bold", marginTop: 6 }}>
-                {s.prefix}{s.value}{s.suffix}
+          {stats.map((s) => {
+            const animated = useCountUp(s.value);
+            return (
+              <div key={s.label} style={statCard} onMouseEnter={liftHover} onMouseLeave={liftLeave}>
+                <div style={{ fontSize: 14, opacity: 0.7 }}>{s.label}</div>
+                <div style={{ fontSize: 22, fontWeight: "bold", marginTop: 6 }}>
+                  {s.prefix}{animated}{s.suffix}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
