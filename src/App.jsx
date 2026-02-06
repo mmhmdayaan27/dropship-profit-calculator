@@ -9,12 +9,13 @@ export default function DropshipCalculator() {
   const [activeTab, setActiveTab] = useState("profit");
 
   // DEFAULT VALUES → all ZERO as requested
-  const [sellingPrice, setSellingPrice] = useState(0);
-  const [productCost, setProductCost] = useState(0);
-  const [shippingCost, setShippingCost] = useState(0);
-  const [fees, setFees] = useState(0);
-  const [adsCost, setAdsCost] = useState(0);
-  const [ordersPerDay, setOrdersPerDay] = useState(0);
+  // DEFAULT VALUES → empty (no zero shown in input)
+  const [sellingPrice, setSellingPrice] = useState("");
+  const [productCost, setProductCost] = useState("");
+  const [shippingCost, setShippingCost] = useState("");
+  const [fees, setFees] = useState("");
+  const [adsCost, setAdsCost] = useState("");
+  const [ordersPerDay, setOrdersPerDay] = useState("");
 
   const [profit, setProfit] = useState(null);
   const [margin, setMargin] = useState(null);
@@ -30,12 +31,12 @@ export default function DropshipCalculator() {
 
     const d = JSON.parse(saved);
 
-    setSellingPrice(d.sellingPrice ?? 0);
-    setProductCost(d.productCost ?? 0);
-    setShippingCost(d.shippingCost ?? 0);
-    setFees(d.fees ?? 0);
-    setAdsCost(d.adsCost ?? 0);
-    setOrdersPerDay(d.ordersPerDay ?? 0);
+    setSellingPrice(d.sellingPrice ?? "");
+    setProductCost(d.productCost ?? "");
+    setShippingCost(d.shippingCost ?? "");
+    setFees(d.fees ?? "");
+    setAdsCost(d.adsCost ?? "");
+    setOrdersPerDay(d.ordersPerDay ?? "");
     setCurrency(d.currency ?? "₹");
     setDarkMode(d.darkMode ?? false);
   }, []);
@@ -168,7 +169,13 @@ export default function DropshipCalculator() {
             ].map(([label, val, set]) => (
               <div key={label}>
                 <label style={{ fontWeight: 600 }}>{label} ({currency})</label>
-                <input type="number" value={val} onChange={(e) => set(e.target.value)} style={input} />
+                <input
+                  type="number"
+                  value={val}
+                  placeholder="Enter amount"
+                  onChange={(e) => set(e.target.value === "" ? "" : Number(e.target.value))}
+                  style={input}
+                />
               </div>
             ))}
 
