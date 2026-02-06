@@ -61,9 +61,7 @@ export default function DropshipCalculator() {
     : { background: "linear-gradient(135deg,#ecfdf5,#d1fae5)", color: "#064e3b" };
 
   const glassCard = {
-    background: darkMode
-      ? "rgba(15,23,42,0.7)"
-      : "rgba(255,255,255,0.6)",
+    background: darkMode ? "rgba(15,23,42,0.7)" : "rgba(255,255,255,0.6)",
     backdropFilter: "blur(14px)",
     WebkitBackdropFilter: "blur(14px)",
     border: "1px solid rgba(255,255,255,0.2)",
@@ -105,7 +103,7 @@ export default function DropshipCalculator() {
     { label: "Daily Profit", value: Number(dailyProfit) || 0, prefix: currency }
   ];
 
-  // counting animation hook
+  // SAFE counting animation hook
   const useCountUp = (target) => {
     const [count, setCount] = useState(0);
 
@@ -129,7 +127,21 @@ export default function DropshipCalculator() {
       return () => clearInterval(timer);
     }, [target]);
 
-    return count.toFixed(2);
+    return Number(count).toFixed(2);
+  };
+
+  // Separate component for stat card (required for hooks)
+  const CountCard = ({ s }) => {
+    const animated = useCountUp(s.value);
+
+    return (
+      <div style={statCard} onMouseEnter={liftHover} onMouseLeave={liftLeave}>
+        <div style={{ fontSize: 14, opacity: 0.7 }}>{s.label}</div>
+        <div style={{ fontSize: 22, fontWeight: "bold", marginTop: 6 }}>
+          {s.prefix}{animated}{s.suffix}
+        </div>
+      </div>
+    );
   };
 
   const totalBaseCost =
@@ -159,17 +171,9 @@ export default function DropshipCalculator() {
       {/* STAT CARDS */}
       {profit !== null && (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(140px,1fr))", gap: 16, marginBottom: 20 }}>
-          {stats.map((s) => {
-            const animated = useCountUp(s.value);
-            return (
-              <div key={s.label} style={statCard} onMouseEnter={liftHover} onMouseLeave={liftLeave}>
-                <div style={{ fontSize: 14, opacity: 0.7 }}>{s.label}</div>
-                <div style={{ fontSize: 22, fontWeight: "bold", marginTop: 6 }}>
-                  {s.prefix}{animated}{s.suffix}
-                </div>
-              </div>
-            );
-          })}
+          {stats.map((s) => (
+            <CountCard key={s.label} s={s} />
+          ))}
         </div>
       )}
 
