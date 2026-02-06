@@ -4,6 +4,7 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "rec
 export default function DropshipCalculator() {
   const [currency, setCurrency] = useState("₹");
   const [darkMode, setDarkMode] = useState(false);
+  const [activeTab, setActiveTab] = useState("profit");
 
   const [sellingPrice, setSellingPrice] = useState(599);
   const [productCost, setProductCost] = useState(120);
@@ -76,7 +77,7 @@ export default function DropshipCalculator() {
     background: darkMode ? "#020617" : "white",
     padding: 28,
     borderRadius: 20,
-    maxWidth: 520,
+    maxWidth: 600,
     margin: "40px auto",
     boxShadow: "0 20px 40px rgba(0,0,0,0.12)",
     border: "1px solid #22c55e33"
@@ -104,97 +105,105 @@ export default function DropshipCalculator() {
     marginTop: 8
   };
 
-  const smallBtn = {
-    background: "transparent",
+  const tabBtn = (tab) => ({
+    padding: "8px 14px",
+    borderRadius: 10,
     border: "1px solid #22c55e",
-    color: darkMode ? "#4ade80" : "#065f46",
-    padding: "6px 10px",
-    borderRadius: 8,
+    background: activeTab === tab ? "#22c55e" : "transparent",
+    color: activeTab === tab ? "white" : darkMode ? "#4ade80" : "#065f46",
     cursor: "pointer",
-    marginRight: 8
-  };
+    marginRight: 8,
+    marginBottom: 12
+  });
+
+  const totalBaseCost =
+    Number(productCost) + Number(shippingCost) + Number(fees) + Number(adsCost);
+
+  const suggestedPrices = [20, 30, 50].map((m) => ({
+    margin: m,
+    price: totalBaseCost ? (totalBaseCost / (1 - m / 100)).toFixed(0) : 0
+  }));
 
   const chartData = profit
     ? [
-        { name: "Total Cost", value: Number(productCost) + Number(shippingCost) + Number(fees) + Number(adsCost) },
-        { name: "Selling Price", value: Number(sellingPrice) },
-        { name: "Net Profit", value: Number(profit) }
+        { name: "Cost", value: totalBaseCost },
+        { name: "Selling", value: Number(sellingPrice) },
+        { name: "Profit", value: Number(profit) }
       ]
     : [];
 
   return (
     <div style={{ minHeight: "100vh", ...theme }}>
       <div style={card}>
-        {/* Logo + Title */}
+        {/* Header */}
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
           <img src="/logo.png" alt="logo" style={{ width: 40, height: 40 }} />
           <h1 style={{ color: "#16a34a" }}>Dropship Profit Calculator</h1>
         </div>
 
-        <div style={{ marginBottom: 16 }}>
-          <button onClick={() => setDarkMode(!darkMode)} style={smallBtn}>
-            {darkMode ? "Light" : "Dark"} Mode
-          </button>
-          <button onClick={saveData} style={smallBtn}>
-            Save
-          </button>
+        {/* Tabs */}
+        <div>
+          <button style={tabBtn("profit")} onClick={() => setActiveTab("profit")}>Profit</button>
+          <button style={tabBtn("suggest")} onClick={() => setActiveTab("suggest")}>Suggested Prices</button>
+          <button style={tabBtn("graph")} onClick={() => setActiveTab("graph")}>Graph</button>
         </div>
 
-        {[
-          ["Selling Price", sellingPrice, setSellingPrice],
-          ["Product Cost", productCost, setProductCost],
-          ["Shipping Charges", shippingCost, setShippingCost],
-          ["Gateway Fees", fees, setFees],
-          ["Ad Cost / Order", adsCost, setAdsCost],
-          ["Orders Per Day", ordersPerDay, setOrdersPerDay]
-        ].map(([label, val, set]) => (
-          <div key={label}>
-            <label style={{ fontWeight: 600 }}>{label}</label>
-            <input
-              type="number"
-              value={val}
-              onChange={(e) => set(e.target.value)}
-              style={input}
-            />
-          </div>
-        ))}
-
-        <button onClick={calculateProfit} style={greenBtn}>
-          Calculate Profit
-        </button>
-
-        {profit && (
+        {/* PROFIT TAB */}
+        {activeTab === "profit" && (
           <>
-            <div style={{ marginTop: 18, lineHeight: 1.8 }}>
-              <p><strong>Net Profit:</strong> {currency}{profit}</p>
-              <p><strong>Margin:</strong> {margin}%</p>
-              <p><strong>Break-even ROAS:</strong> {roas}x</p>
-              <p><strong>Daily Profit:</strong> {currency}{dailyProfit}</p>
-              <p><strong>Monthly Profit:</strong> {currency}{monthlyProfit}</p>
-            </div>
+            {[
+              ["Selling Price", sellingPrice, setSellingPrice],
+              ["Product Cost", productCost, setProductCost],
+              ["Shipping Charges", shippingCost, setShippingCost],
+              ["Gateway Fees", fees, setFees],
+              ["Ad Cost / Order", adsCost, setAdsCost],
+              ["Orders Per Day", ordersPerDay, setOrdersPerDay]
+            ].map(([label, val, set]) => (
+              <div key={label}>
+                <label style={{ fontWeight: 600 }}>{label}</label>
+                <input type="number" value={val} onChange={(e) => set(e.target.value)} style={input} />
+              </div>
+            ))}
 
-            {/* Graph with Axis Names */}
-            <div style={{ height: 260, marginTop: 24 }}>
-              <h3 style={{ marginBottom: 8 }}>Profit Overview Graph</h3>
-              <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 10 }}>
-                X‑axis: Cost → Selling → Profit &nbsp; | &nbsp; Y‑axis: Amount in {currency}
-              </p>
+            <button onClick={calculateProfit} style={greenBtn}>Calculate Profit</button>
 
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={chartData}>
-                  <XAxis
-                    dataKey="name"
-                    label={{ value: "Stage", position: "insideBottom", offset: -5 }}
-                  />
-                  <YAxis
-                    label={{ value: `Amount (${currency})`, angle: -90, position: "insideLeft" }}
-                  />
-                  <Tooltip />
-                  <Line type="monotone" dataKey="value" stroke="#22c55e" strokeWidth={3} />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
+            {profit && (
+              <div style={{ marginTop: 18, lineHeight: 1.8 }}>
+                <p><strong>Net Profit:</strong> {currency}{profit}</p>
+                <p><strong>Margin:</strong> {margin}%</p>
+                <p><strong>Break-even ROAS:</strong> {roas}x</p>
+                <p><strong>Daily Profit:</strong> {currency}{dailyProfit}</p>
+                <p><strong>Monthly Profit:</strong> {currency}{monthlyProfit}</p>
+              </div>
+            )}
           </>
+        )}
+
+        {/* SUGGESTED PRICES TAB */}
+        {activeTab === "suggest" && (
+          <div style={{ marginTop: 20 }}>
+            <h3>Recommended Selling Prices</h3>
+            {suggestedPrices.map((s) => (
+              <p key={s.margin}>
+                For <strong>{s.margin}%</strong> margin → <strong>{currency}{s.price}</strong>
+              </p>
+            ))}
+          </div>
+        )}
+
+        {/* GRAPH TAB */}
+        {activeTab === "graph" && profit && (
+          <div style={{ height: 300, marginTop: 20 }}>
+            <h3>Profit Graph</h3>
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={chartData}>
+                <XAxis dataKey="name" label={{ value: "Stage", position: "insideBottom", offset: -5 }} />
+                <YAxis label={{ value: `Amount (${currency})`, angle: -90, position: "insideLeft" }} />
+                <Tooltip />
+                <Line type="monotone" dataKey="value" stroke="#22c55e" strokeWidth={3} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
         )}
       </div>
     </div>
