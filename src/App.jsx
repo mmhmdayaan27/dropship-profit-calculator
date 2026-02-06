@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 
 export default function DropshipCalculator() {
   const [currency, setCurrency] = useState("₹");
@@ -113,12 +114,22 @@ export default function DropshipCalculator() {
     marginRight: 8
   };
 
+  const chartData = profit
+    ? [
+        { name: "Total Cost", value: Number(productCost) + Number(shippingCost) + Number(fees) + Number(adsCost) },
+        { name: "Selling Price", value: Number(sellingPrice) },
+        { name: "Net Profit", value: Number(profit) }
+      ]
+    : [];
+
   return (
     <div style={{ minHeight: "100vh", ...theme }}>
       <div style={card}>
-        <h1 style={{ color: "#16a34a", marginBottom: 10 }}>
-          Dropship Profit Calculator
-        </h1>
+        {/* Logo + Title */}
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+          <img src="/logo.png" alt="logo" style={{ width: 40, height: 40 }} />
+          <h1 style={{ color: "#16a34a" }}>Dropship Profit Calculator</h1>
+        </div>
 
         <div style={{ marginBottom: 16 }}>
           <button onClick={() => setDarkMode(!darkMode)} style={smallBtn}>
@@ -153,13 +164,37 @@ export default function DropshipCalculator() {
         </button>
 
         {profit && (
-          <div style={{ marginTop: 18, lineHeight: 1.8 }}>
-            <p><strong>Net Profit:</strong> {currency}{profit}</p>
-            <p><strong>Margin:</strong> {margin}%</p>
-            <p><strong>Break-even ROAS:</strong> {roas}x</p>
-            <p><strong>Daily Profit:</strong> {currency}{dailyProfit}</p>
-            <p><strong>Monthly Profit:</strong> {currency}{monthlyProfit}</p>
-          </div>
+          <>
+            <div style={{ marginTop: 18, lineHeight: 1.8 }}>
+              <p><strong>Net Profit:</strong> {currency}{profit}</p>
+              <p><strong>Margin:</strong> {margin}%</p>
+              <p><strong>Break-even ROAS:</strong> {roas}x</p>
+              <p><strong>Daily Profit:</strong> {currency}{dailyProfit}</p>
+              <p><strong>Monthly Profit:</strong> {currency}{monthlyProfit}</p>
+            </div>
+
+            {/* Graph with Axis Names */}
+            <div style={{ height: 260, marginTop: 24 }}>
+              <h3 style={{ marginBottom: 8 }}>Profit Overview Graph</h3>
+              <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 10 }}>
+                X‑axis: Cost → Selling → Profit &nbsp; | &nbsp; Y‑axis: Amount in {currency}
+              </p>
+
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={chartData}>
+                  <XAxis
+                    dataKey="name"
+                    label={{ value: "Stage", position: "insideBottom", offset: -5 }}
+                  />
+                  <YAxis
+                    label={{ value: `Amount (${currency})`, angle: -90, position: "insideLeft" }}
+                  />
+                  <Tooltip />
+                  <Line type="monotone" dataKey="value" stroke="#22c55e" strokeWidth={3} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </>
         )}
       </div>
     </div>
