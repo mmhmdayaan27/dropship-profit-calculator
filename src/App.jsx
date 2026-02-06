@@ -8,8 +8,7 @@ export default function DropshipCalculator() {
   const [darkMode, setDarkMode] = useState(false);
   const [activeTab, setActiveTab] = useState("profit");
 
-  // DEFAULT VALUES → all ZERO as requested
-  // DEFAULT VALUES → empty (no zero shown in input)
+  // Empty default values (clean UX)
   const [sellingPrice, setSellingPrice] = useState("");
   const [productCost, setProductCost] = useState("");
   const [shippingCost, setShippingCost] = useState("");
@@ -25,8 +24,6 @@ export default function DropshipCalculator() {
 
   useEffect(() => {
     const saved = localStorage.getItem("dropship-data");
-
-    // If NO saved data → keep everything at ZERO (true default)
     if (!saved) return;
 
     const d = JSON.parse(saved);
@@ -78,7 +75,7 @@ export default function DropshipCalculator() {
 
   const theme = darkMode
     ? { background: "#0f172a", color: "white" }
-    : { background: "#ecfdf5", color: "#064e3b" };
+    : { background: "linear-gradient(135deg,#ecfdf5,#d1fae5)", color: "#064e3b" };
 
   const card = {
     background: darkMode ? "#020617" : "white",
@@ -86,8 +83,9 @@ export default function DropshipCalculator() {
     borderRadius: 20,
     maxWidth: 620,
     margin: "40px auto",
-    boxShadow: "0 20px 40px rgba(0,0,0,0.12)",
-    border: "1px solid #22c55e33"
+    boxShadow: "0 20px 50px rgba(0,0,0,0.15)",
+    border: "1px solid #22c55e33",
+    transition: "transform 0.3s ease, box-shadow 0.3s ease"
   };
 
   const input = {
@@ -97,7 +95,8 @@ export default function DropshipCalculator() {
     marginBottom: 14,
     borderRadius: 10,
     border: "1px solid #22c55e55",
-    outline: "none"
+    outline: "none",
+    transition: "all 0.2s ease"
   };
 
   const greenBtn = {
@@ -109,7 +108,8 @@ export default function DropshipCalculator() {
     cursor: "pointer",
     fontWeight: "bold",
     width: "100%",
-    marginTop: 8
+    marginTop: 8,
+    transition: "transform 0.15s ease, box-shadow 0.15s ease"
   };
 
   const tabBtn = (tab) => ({
@@ -120,7 +120,8 @@ export default function DropshipCalculator() {
     color: activeTab === tab ? "white" : darkMode ? "#4ade80" : "#065f46",
     cursor: "pointer",
     marginRight: 8,
-    marginBottom: 12
+    marginBottom: 12,
+    transition: "all 0.2s ease"
   });
 
   const totalBaseCost =
@@ -140,20 +141,37 @@ export default function DropshipCalculator() {
     : [];
 
   return (
-    <div style={{ minHeight: "100vh", ...theme }}>
-      <div style={card}>
+    <div style={{ minHeight: "100vh", padding: 20, ...theme }}>
+      <div
+        style={card}
+        onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-4px)")}
+        onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}
+      >
         {/* Header */}
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
-          <img src="/logo.png" alt="logo" style={{ width: 40, height: 40 }} />
+          <img
+            src="/logo.png"
+            alt="logo"
+            style={{ width: 40, height: 40, transition: "transform 0.3s" }}
+            onMouseEnter={(e) => (e.currentTarget.style.transform = "rotate(10deg) scale(1.1)")}
+            onMouseLeave={(e) => (e.currentTarget.style.transform = "rotate(0) scale(1)")}
+          />
           <h1 style={{ color: "#16a34a" }}>Dropship Profit Calculator</h1>
         </div>
 
         {/* Tabs */}
         <div>
-          <button style={tabBtn("profit")} onClick={() => setActiveTab("profit")}>Profit</button>
-          <button style={tabBtn("suggest")} onClick={() => setActiveTab("suggest")}>Suggested Prices</button>
-          <button style={tabBtn("graph")} onClick={() => setActiveTab("graph")}>Graph</button>
-          <button style={tabBtn("currency")} onClick={() => setActiveTab("currency")}>Currency</button>
+          {["profit", "suggest", "graph", "currency"].map((t) => (
+            <button key={t} style={tabBtn(t)} onClick={() => setActiveTab(t)}>
+              {t === "profit"
+                ? "Profit"
+                : t === "suggest"
+                ? "Suggested Prices"
+                : t === "graph"
+                ? "Graph"
+                : "Currency"}
+            </button>
+          ))}
         </div>
 
         {/* PROFIT TAB */}
@@ -167,7 +185,7 @@ export default function DropshipCalculator() {
               ["Ad Cost / Order", adsCost, setAdsCost],
               ["Orders Per Day", ordersPerDay, setOrdersPerDay]
             ].map(([label, val, set]) => (
-              <div key={label}>
+              <div key={label} style={{ animation: "fadeIn 0.4s ease" }}>
                 <label style={{ fontWeight: 600 }}>{label} ({currency})</label>
                 <input
                   type="number"
@@ -179,10 +197,17 @@ export default function DropshipCalculator() {
               </div>
             ))}
 
-            <button onClick={calculateProfit} style={greenBtn}>Calculate Profit</button>
+            <button
+              onClick={calculateProfit}
+              style={greenBtn}
+              onMouseDown={(e) => (e.currentTarget.style.transform = "scale(0.97)")}
+              onMouseUp={(e) => (e.currentTarget.style.transform = "scale(1)")}
+            >
+              Calculate Profit
+            </button>
 
             {profit !== null && (
-              <div style={{ marginTop: 18, lineHeight: 1.8 }}>
+              <div style={{ marginTop: 18, lineHeight: 1.8, animation: "fadeIn 0.5s ease" }}>
                 <p><strong>Net Profit:</strong> {currency}{profit}</p>
                 <p><strong>Margin:</strong> {margin}%</p>
                 <p><strong>Break-even ROAS:</strong> {roas}x</p>
@@ -193,9 +218,9 @@ export default function DropshipCalculator() {
           </>
         )}
 
-        {/* SUGGESTED PRICES TAB */}
+        {/* SUGGESTED TAB */}
         {activeTab === "suggest" && (
-          <div style={{ marginTop: 20 }}>
+          <div style={{ marginTop: 20, animation: "fadeIn 0.4s ease" }}>
             <h3>Recommended Selling Prices</h3>
             {suggestedPrices.map((s) => (
               <p key={s.margin}>
@@ -207,12 +232,12 @@ export default function DropshipCalculator() {
 
         {/* GRAPH TAB */}
         {activeTab === "graph" && profit !== null && (
-          <div style={{ height: 300, marginTop: 20 }}>
+          <div style={{ height: 300, marginTop: 20, animation: "fadeIn 0.4s ease" }}>
             <h3>Profit Graph</h3>
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={chartData}>
-                <XAxis dataKey="name" label={{ value: "Stage", position: "insideBottom", offset: -5 }} />
-                <YAxis label={{ value: `Amount (${currency})`, angle: -90, position: "insideLeft" }} />
+                <XAxis dataKey="name" />
+                <YAxis />
                 <Tooltip />
                 <Line type="monotone" dataKey="value" stroke="#22c55e" strokeWidth={3} />
               </LineChart>
@@ -222,7 +247,7 @@ export default function DropshipCalculator() {
 
         {/* CURRENCY TAB */}
         {activeTab === "currency" && (
-          <div style={{ marginTop: 20 }}>
+          <div style={{ marginTop: 20, animation: "fadeIn 0.4s ease" }}>
             <h3>Select Currency</h3>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
               {currencies.map((c) => (
@@ -235,7 +260,8 @@ export default function DropshipCalculator() {
                     border: "1px solid #22c55e",
                     background: currency === c ? "#22c55e" : "transparent",
                     color: currency === c ? "white" : darkMode ? "#4ade80" : "#065f46",
-                    cursor: "pointer"
+                    cursor: "pointer",
+                    transition: "all 0.2s ease"
                   }}
                 >
                   {c}
@@ -245,6 +271,9 @@ export default function DropshipCalculator() {
           </div>
         )}
       </div>
+
+      {/* Simple fade animation */}
+      <style>{`@keyframes fadeIn { from {opacity:0; transform:translateY(6px);} to {opacity:1; transform:translateY(0);} }`}</style>
     </div>
   );
 }
