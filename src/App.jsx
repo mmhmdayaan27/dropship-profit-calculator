@@ -69,32 +69,67 @@ export default function DropshipCalculator() {
 
   const theme = darkMode
     ? { background: "#0f172a", color: "white" }
-    : { background: "#f1f5f9", color: "#0f172a" };
+    : { background: "#ecfdf5", color: "#064e3b" };
 
   const card = {
-    background: darkMode ? "#1e293b" : "white",
-    padding: 24,
-    borderRadius: 16,
-    maxWidth: 500,
+    background: darkMode ? "#020617" : "white",
+    padding: 28,
+    borderRadius: 20,
+    maxWidth: 520,
     margin: "40px auto",
-    boxShadow: "0 10px 25px rgba(0,0,0,0.1)"
+    boxShadow: "0 20px 40px rgba(0,0,0,0.12)",
+    border: "1px solid #22c55e33"
   };
 
-  const input = { width: "100%", padding: 10, marginTop: 5, marginBottom: 10 };
+  const input = {
+    width: "100%",
+    padding: 12,
+    marginTop: 6,
+    marginBottom: 14,
+    borderRadius: 10,
+    border: "1px solid #22c55e55",
+    outline: "none"
+  };
+
+  const greenBtn = {
+    background: "#22c55e",
+    color: "white",
+    border: "none",
+    padding: "12px 16px",
+    borderRadius: 12,
+    cursor: "pointer",
+    fontWeight: "bold",
+    width: "100%",
+    marginTop: 8
+  };
+
+  const smallBtn = {
+    background: "transparent",
+    border: "1px solid #22c55e",
+    color: darkMode ? "#4ade80" : "#065f46",
+    padding: "6px 10px",
+    borderRadius: 8,
+    cursor: "pointer",
+    marginRight: 8
+  };
 
   return (
     <div style={{ minHeight: "100vh", ...theme }}>
       <div style={card}>
-        <h1 style={{ color: "#22c55e" }}>Dropship Profit Calculator</h1>
+        <h1 style={{ color: "#16a34a", marginBottom: 10 }}>
+          Dropship Profit Calculator
+        </h1>
 
-        <button onClick={() => setDarkMode(!darkMode)}>
-          {darkMode ? "Light" : "Dark"} Mode
-        </button>
-        <button onClick={saveData} style={{ marginLeft: 10 }}>
-          Save
-        </button>
+        <div style={{ marginBottom: 16 }}>
+          <button onClick={() => setDarkMode(!darkMode)} style={smallBtn}>
+            {darkMode ? "Light" : "Dark"} Mode
+          </button>
+          <button onClick={saveData} style={smallBtn}>
+            Save
+          </button>
+        </div>
 
-        {[ 
+        {[
           ["Selling Price", sellingPrice, setSellingPrice],
           ["Product Cost", productCost, setProductCost],
           ["Shipping Charges", shippingCost, setShippingCost],
@@ -103,7 +138,7 @@ export default function DropshipCalculator() {
           ["Orders Per Day", ordersPerDay, setOrdersPerDay]
         ].map(([label, val, set]) => (
           <div key={label}>
-            <label>{label}</label>
+            <label style={{ fontWeight: 600 }}>{label}</label>
             <input
               type="number"
               value={val}
@@ -113,15 +148,17 @@ export default function DropshipCalculator() {
           </div>
         ))}
 
-        <button onClick={calculateProfit}>Calculate Profit</button>
+        <button onClick={calculateProfit} style={greenBtn}>
+          Calculate Profit
+        </button>
 
         {profit && (
-          <div style={{ marginTop: 15 }}>
-            <p>Net Profit: {currency}{profit}</p>
-            <p>Margin: {margin}%</p>
-            <p>Break-even ROAS: {roas}x</p>
-            <p>Daily Profit: {currency}{dailyProfit}</p>
-            <p>Monthly Profit: {currency}{monthlyProfit}</p>
+          <div style={{ marginTop: 18, lineHeight: 1.8 }}>
+            <p><strong>Net Profit:</strong> {currency}{profit}</p>
+            <p><strong>Margin:</strong> {margin}%</p>
+            <p><strong>Break-even ROAS:</strong> {roas}x</p>
+            <p><strong>Daily Profit:</strong> {currency}{dailyProfit}</p>
+            <p><strong>Monthly Profit:</strong> {currency}{monthlyProfit}</p>
           </div>
         )}
       </div>
