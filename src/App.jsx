@@ -12,7 +12,7 @@ export default function DropshipCalculator() {
   const [sellingPrice, setSellingPrice] = useState("");
   const [productCost, setProductCost] = useState("");
   const [shippingCost, setShippingCost] = useState("");
-  const [fees, setFees] = useState("");
+  const [platformFees, setPlatformFees] = useState("");
   const [adsCost, setAdsCost] = useState("");
   const [ordersPerDay, setOrdersPerDay] = useState("");
 
@@ -20,26 +20,42 @@ export default function DropshipCalculator() {
   const [margin, setMargin] = useState(0);
   const [roas, setRoas] = useState(0);
   const [dailyProfit, setDailyProfit] = useState(0);
-  const [monthlyProfit, setMonthlyProfit] = useState(0);
 
-  // 🔥 AUTO CALCULATION whenever values change
+  // Save history
+  const [history, setHistory] = useState([]);
+
+  // AUTO CALCULATION whenever values change
   useEffect(() => {
     const total =
       Number(productCost) +
       Number(shippingCost) +
-      Number(fees) +
+      Number(platformFees) +
       Number(adsCost);
 
     const net = Number(sellingPrice) - total;
     const m = sellingPrice ? (net / Number(sellingPrice)) * 100 : 0;
     const r = adsCost ? Number(sellingPrice) / Number(adsCost) : 0;
 
+    const dProfit = net * Number(ordersPerDay || 0);
+
     setProfit(net || 0);
     setMargin(m || 0);
     setRoas(r || 0);
-    setDailyProfit(net * Number(ordersPerDay || 0));
-    setMonthlyProfit(net * Number(ordersPerDay || 0) * 30);
-  }, [sellingPrice, productCost, shippingCost, fees, adsCost, ordersPerDay]);
+    setDailyProfit(dProfit || 0);
+
+    // Save to history only if selling price entered
+    if (sellingPrice) {
+      setHistory((prev) => [
+        {
+          time: new Date().toLocaleTimeString(),
+          profit: net.toFixed(2),
+          margin: m.toFixed(2),
+          roas: r.toFixed(2)
+        },
+        ...prev.slice(0, 4)
+      ]);
+    }
+  }, [sellingPrice, productCost, shippingCost, platformFees, adsCost, ordersPerDay]);
 
   const theme = darkMode
     ? { background: "#020617", color: "white" }
@@ -88,7 +104,7 @@ export default function DropshipCalculator() {
     { label: "Daily Profit", value: dailyProfit, prefix: currency }
   ];
 
-  // SAFE counting animation hook
+  // Counting animation hook
   const useCountUp = (target) => {
     const [count, setCount] = useState(0);
 
@@ -115,7 +131,6 @@ export default function DropshipCalculator() {
     return Number(count).toFixed(2);
   };
 
-  // Separate component for stat card (required for hooks)
   const CountCard = ({ s }) => {
     const animated = useCountUp(s.value);
 
@@ -130,7 +145,7 @@ export default function DropshipCalculator() {
   };
 
   const totalBaseCost =
-    Number(productCost) + Number(shippingCost) + Number(fees) + Number(adsCost);
+    Number(productCost) + Number(shippingCost) + Number(platformFees) + Number(adsCost);
 
   const suggestedPrices = [20, 30, 50].map((m) => ({
     margin: m,
@@ -163,7 +178,7 @@ export default function DropshipCalculator() {
 
         {/* TABS */}
         <div style={{ marginBottom: 16 }}>
-          {["profit", "suggest", "graph", "currency"].map((t) => (
+          {["profit", "suggest", "graph", "currency", "history"].map((t) => (
             <button
               key={t}
               onClick={() => setActiveTab(t)}
@@ -179,7 +194,15 @@ export default function DropshipCalculator() {
                 transition: "all 0.25s ease"
               }}
             >
-              {t === "profit" ? "Profit" : t === "suggest" ? "Suggested Prices" : t === "graph" ? "Graph" : "Currency"}
+              {t === "profit"
+                ? "Profit"
+                : t === "suggest"
+                ? "Suggested Prices"
+                : t === "graph"
+                ? "Graph"
+                : t === "currency"
+                ? "Currency"
+                : "History"}
             </button>
           ))}
         </div>
@@ -188,16 +211,24 @@ export default function DropshipCalculator() {
         {activeTab === "profit" && (
           <>
             {[
-              ["Selling Price", sellingPrice, setSellingPrice],
-              ["Product Cost", productCost, setProductCost],
-              ["Shipping", shippingCost, setShippingCost],
-              ["Fees", fees, setFees],
-              ["Ad Cost", adsCost, setAdsCost],
-              ["Orders/Day", ordersPerDay, setOrdersPerDay]
-            ].map(([label, val, set]) => (
+              ["Selling Price", sellingPrice, setSellingPrice, true],
+              ["Product Cost", productCost, setProductCost, true],
+              ["Shipping", shippingCost, setShippingCost, true],
+              ["Platform Fees", platformFees, setPlatformFees, true],
+              ["Ad Cost", adsCost, setAdsCost, true],
+              ["Orders/Day", ordersPerDay, setOrdersPerDay, false]
+            ].map(([label, val, set, showCurrency]) => (
               <div key={label}>
-                <label>{label} ({currency})</label>
-                <input type="number" value={val} placeholder="Enter" onChange={(e) => set(e.target.value)} style={input} />
+                <label>
+                  {label} {showCurrency && `(${currency})`}
+                </label>
+                <input
+                  type="number"
+                  value={val}
+                  placeholder="Enter"
+                  onChange={(e) => set(e.target.value)}
+                  style={input}
+                />
               </div>
             ))}
           </>
@@ -207,7 +238,9 @@ export default function DropshipCalculator() {
         {activeTab === "suggest" && (
           <div>
             {suggestedPrices.map((s) => (
-              <p key={s.margin}>For {s.margin}% → <b>{currency}{s.price}</b></p>
+              <p key={s.margin}>
+                For {s.margin}% → <b>{currency}{s.price}</b>
+              </p>
             ))}
           </div>
         )}
@@ -230,7 +263,26 @@ export default function DropshipCalculator() {
         {activeTab === "currency" && (
           <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
             {currencies.map((c) => (
-              <button key={c} onClick={() => setCurrency(c)} style={{ ...input, width: "auto", cursor: "pointer" }}>{c}</button>
+              <button
+                key={c}
+                onClick={() => setCurrency(c)}
+                style={{ ...input, width: "auto", cursor: "pointer" }}
+              >
+                {c}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* HISTORY */}
+        {activeTab === "history" && (
+          <div>
+            <h3>Recent Calculations</h3>
+            {history.length === 0 && <p>No history yet.</p>}
+            {history.map((h, i) => (
+              <div key={i} style={{ marginBottom: 10 }}>
+                <strong>{h.time}</strong> → Profit {currency}{h.profit} | Margin {h.margin}% | ROAS {h.roas}x
+              </div>
             ))}
           </div>
         )}
