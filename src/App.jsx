@@ -12,7 +12,7 @@ export default function DropshipCalculator() {
   const [sellingPrice, setSellingPrice] = useState("");
   const [productCost, setProductCost] = useState("");
   const [shippingCost, setShippingCost] = useState("");
-  const [fees, setFees] = useState("");
+  const [platformfees, setPlatformFees] = useState("");
   const [adsCost, setAdsCost] = useState("");
   const [ordersPerDay, setOrdersPerDay] = useState("");
 
