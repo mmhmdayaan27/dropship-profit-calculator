@@ -20,10 +20,11 @@ export default function DropshipCalculator() {
   const [dailyProfit, setDailyProfit] = useState(null);
   const [monthlyProfit, setMonthlyProfit] = useState(null);
   const [chartData, setChartData] = useState([]);
+
+  // ✅ Corrected useEffect (your bug was here)
+  useEffect(() => {
     const saved = localStorage.getItem("dropship-data");
     if (saved) {
-
-  useEffect(() => {
       const d = JSON.parse(saved);
       setSellingPrice(d.sellingPrice);
       setProductCost(d.productCost);
@@ -109,64 +110,67 @@ export default function DropshipCalculator() {
     : { background: "#f1f5f9", color: "#0f172a" };
 
   const cardStyle = darkMode
-    ? { background: "#1e293b", border: "1px solid #334155" }
-    : { background: "#ffffff", border: "1px solid #e2e8f0" };
+    ? { background: "#1e293b", border: "1px solid #334155", boxShadow: "0 10px 25px rgba(0,0,0,0.3)" }
+    : { background: "#ffffff", border: "1px solid #e2e8f0", boxShadow: "0 10px 25px rgba(0,0,0,0.05)" };
 
   const inputStyle = {
-    padding: "10px",
-    borderRadius: "8px",
+    padding: "12px",
+    borderRadius: "10px",
     border: "1px solid #cbd5e1",
     width: "100%",
-    marginTop: "4px"
+    marginTop: "6px",
+    fontSize: "14px"
   };
 
   const buttonGreen = {
     background: "#16a34a",
     color: "white",
     border: "none",
-    padding: "12px 16px",
-    borderRadius: "10px",
+    padding: "14px 18px",
+    borderRadius: "12px",
     cursor: "pointer",
-    fontWeight: "600"
+    fontWeight: "600",
+    fontSize: "15px",
+    width: "100%"
   };
 
   return (
     <div style={{ minHeight: "100vh", padding: 24, ...themeStyles }}>
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ maxWidth: 900, margin: "0 auto" }}>
         {/* Header */}
-        <div style={{ ...cardStyle, borderRadius: 20, padding: 24, marginBottom: 20, textAlign: "center" }}>
-          <h1 style={{ color: "#22c55e" }}>Dropship Profit Calculator</h1>
-          <p style={{ opacity: 0.7 }}>Estimate profit, margins, and break‑even performance</p>
+        <div style={{ ...cardStyle, borderRadius: 24, padding: 28, marginBottom: 24, textAlign: "center" }}>
+          <h1 style={{ color: "#22c55e", marginBottom: 6 }}>Dropship Profit Calculator</h1>
+          <p style={{ opacity: 0.7, marginBottom: 12 }}>Estimate profit, margins, and break‑even performance</p>
 
           {/* Controls */}
-          <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap", marginTop: 10 }}>
-            <button onClick={() => setDarkMode(!darkMode)}>{darkMode ? "Light" : "Dark"} Mode</button>
+          <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
+            <button onClick={() => setDarkMode(!darkMode)}>
+              {darkMode ? "☀️ Light" : "🌙 Dark"} Mode
+            </button>
             <button onClick={saveData}>💾 Save</button>
             <button onClick={loadData}>📂 Load</button>
           </div>
 
           {/* Currency */}
-          <div style={{ marginTop: 10 }}>
+          <div style={{ marginTop: 12 }}>
             {currencies.map((c) => (
               <button key={c} onClick={() => setCurrency(c)} style={{ margin: 4 }}>{c}</button>
             ))}
           </div>
 
           {/* Tabs */}
-          <div style={{ marginTop: 10 }}>
-            {[
-              { id: "profit", label: "Profit" },
-              { id: "suggest", label: "Suggested Prices" },
-              { id: "graph", label: "Graph" }
-            ].map((t) => (
-              <button key={t.id} onClick={() => setActiveTab(t.id)} style={{ margin: 4 }}>{t.label}</button>
+          <div style={{ marginTop: 12 }}>
+            {["profit", "suggest", "graph"].map((t) => (
+              <button key={t} onClick={() => setActiveTab(t)} style={{ margin: 4, fontWeight: activeTab === t ? "bold" : "normal" }}>
+                {t}
+              </button>
             ))}
           </div>
         </div>
 
         {/* Profit Tab */}
         {activeTab === "profit" && (
-          <div style={{ ...cardStyle, borderRadius: 20, padding: 24 }}>
+          <div style={{ ...cardStyle, borderRadius: 24, padding: 28 }}>
             {[
               ["Selling Price", sellingPrice, setSellingPrice],
               ["Product Cost", productCost, setProductCost],
@@ -175,21 +179,21 @@ export default function DropshipCalculator() {
               ["Ad Cost / Order", adsCost, setAdsCost],
               ["Orders Per Day", ordersPerDay, setOrdersPerDay]
             ].map(([label, value, setter]) => (
-              <div key={label} style={{ marginBottom: 12 }}>
-                <label>{label}</label>
+              <div key={label} style={{ marginBottom: 14 }}>
+                <label style={{ fontWeight: 500 }}>{label}</label>
                 <input type="number" value={value} onChange={(e) => setter(e.target.value)} style={inputStyle} />
               </div>
             ))}
 
-            <button onClick={calculateProfit} style={{ ...buttonGreen, width: "100%" }}>Calculate Profit</button>
+            <button onClick={calculateProfit} style={buttonGreen}>Calculate Profit</button>
 
             {profit !== null && (
-              <div style={{ marginTop: 16 }}>
-                <p>Net Profit: {currency}{profit}</p>
-                <p>Margin: {margin}%</p>
-                <p>Break‑even ROAS: {roas}x</p>
-                <p>Daily Profit: {currency}{dailyProfit}</p>
-                <p>Monthly Profit: {currency}{monthlyProfit}</p>
+              <div style={{ marginTop: 18, lineHeight: 1.8 }}>
+                <p><strong>Net Profit:</strong> {currency}{profit}</p>
+                <p><strong>Margin:</strong> {margin}%</p>
+                <p><strong>Break‑even ROAS:</strong> {roas}x</p>
+                <p><strong>Daily Profit:</strong> {currency}{dailyProfit}</p>
+                <p><strong>Monthly Profit:</strong> {currency}{monthlyProfit}</p>
               </div>
             )}
           </div>
@@ -197,22 +201,22 @@ export default function DropshipCalculator() {
 
         {/* Suggested */}
         {activeTab === "suggest" && (
-          <div style={{ ...cardStyle, borderRadius: 20, padding: 24 }}>
+          <div style={{ ...cardStyle, borderRadius: 24, padding: 28 }}>
             {suggestedPrices.map((s) => (
-              <p key={s.margin}>{s.margin}% → {currency}{s.price}</p>
+              <p key={s.margin} style={{ fontSize: 18 }}>{s.margin}% → {currency}{s.price}</p>
             ))}
           </div>
         )}
 
         {/* Graph */}
         {activeTab === "graph" && chartData.length > 0 && (
-          <div style={{ ...cardStyle, borderRadius: 20, padding: 24 }}>
-            <ResponsiveContainer width="100%" height={250}>
+          <div style={{ ...cardStyle, borderRadius: 24, padding: 28 }}>
+            <ResponsiveContainer width="100%" height={260}>
               <LineChart data={chartData}>
                 <XAxis dataKey="adCost" />
                 <YAxis />
                 <Tooltip />
-                <Line type="monotone" dataKey="profit" stroke="#22c55e" />
+                <Line type="monotone" dataKey="profit" stroke="#22c55e" strokeWidth={3} />
               </LineChart>
             </ResponsiveContainer>
           </div>
