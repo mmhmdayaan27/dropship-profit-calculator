@@ -286,6 +286,43 @@ export default function DropshipCalculator() {
             ))}
           </div>
         )}
+        {/* SEO CONTENT SECTION */}
+<div style={{ marginTop: 40, lineHeight: 1.7, maxWidth: 900 }}>
+  <h2>Dropship Profit Calculator – Free Shopify Profit & Margin Tool</h2>
+
+  <p>
+    This free dropship profit calculator helps ecommerce sellers instantly
+    calculate profit, margin, ROAS, and daily earnings. Whether you run a
+    Shopify store, print-on-demand business, or any online shop, understanding
+    real profit is essential for success.
+  </p>
+
+  <h3>What is Dropshipping Profit?</h3>
+  <p>
+    Dropshipping profit is the money left after subtracting product cost,
+    shipping, platform fees, and advertising costs from your selling price.
+    Knowing this number helps you avoid losing money on ads.
+  </p>
+
+  <h3>Why Margin and ROAS Matter</h3>
+  <p>
+    Healthy dropshipping businesses usually target 20–40% profit margin and a
+    ROAS above break-even. This calculator automatically shows these values so
+    you can make smarter pricing decisions.
+  </p>
+
+  <h3>How to Use This Calculator</h3>
+  <ul>
+    <li>Enter selling price and product cost</li>
+    <li>Add shipping, platform fees, and ad cost</li>
+    <li>View instant profit, margin, ROAS, and daily earnings</li>
+  </ul>
+
+  <p>
+    Use this free ecommerce tool before launching ads to make sure your product
+    is truly profitable.
+  </p>
+</div>
       </div>
     </div>
   );
