@@ -16,29 +16,14 @@ export default function DropshipCalculator() {
   const [adsCost, setAdsCost] = useState("");
   const [ordersPerDay, setOrdersPerDay] = useState("");
 
-  const [profit, setProfit] = useState(null);
-  const [margin, setMargin] = useState(null);
-  const [roas, setRoas] = useState(null);
-  const [dailyProfit, setDailyProfit] = useState(null);
-  const [monthlyProfit, setMonthlyProfit] = useState(null);
+  const [profit, setProfit] = useState(0);
+  const [margin, setMargin] = useState(0);
+  const [roas, setRoas] = useState(0);
+  const [dailyProfit, setDailyProfit] = useState(0);
+  const [monthlyProfit, setMonthlyProfit] = useState(0);
 
+  // 🔥 AUTO CALCULATION whenever values change
   useEffect(() => {
-    const saved = localStorage.getItem("dropship-data");
-    if (!saved) return;
-
-    const d = JSON.parse(saved);
-
-    setSellingPrice(d.sellingPrice ?? "");
-    setProductCost(d.productCost ?? "");
-    setShippingCost(d.shippingCost ?? "");
-    setFees(d.fees ?? "");
-    setAdsCost(d.adsCost ?? "");
-    setOrdersPerDay(d.ordersPerDay ?? "");
-    setCurrency(d.currency ?? "₹");
-    setDarkMode(d.darkMode ?? false);
-  }, []);
-
-  const calculateProfit = () => {
     const total =
       Number(productCost) +
       Number(shippingCost) +
@@ -49,12 +34,12 @@ export default function DropshipCalculator() {
     const m = sellingPrice ? (net / Number(sellingPrice)) * 100 : 0;
     const r = adsCost ? Number(sellingPrice) / Number(adsCost) : 0;
 
-    setProfit(net.toFixed(2));
-    setMargin(m.toFixed(2));
-    setRoas(r.toFixed(2));
-    setDailyProfit((net * ordersPerDay).toFixed(2));
-    setMonthlyProfit((net * ordersPerDay * 30).toFixed(2));
-  };
+    setProfit(net || 0);
+    setMargin(m || 0);
+    setRoas(r || 0);
+    setDailyProfit(net * Number(ordersPerDay || 0));
+    setMonthlyProfit(net * Number(ordersPerDay || 0) * 30);
+  }, [sellingPrice, productCost, shippingCost, fees, adsCost, ordersPerDay]);
 
   const theme = darkMode
     ? { background: "#020617", color: "white" }
@@ -97,10 +82,10 @@ export default function DropshipCalculator() {
   };
 
   const stats = [
-    { label: "Profit", value: Number(profit) || 0, prefix: currency },
-    { label: "Margin", value: Number(margin) || 0, suffix: "%" },
-    { label: "ROAS", value: Number(roas) || 0, suffix: "x" },
-    { label: "Daily Profit", value: Number(dailyProfit) || 0, prefix: currency }
+    { label: "Profit", value: profit, prefix: currency },
+    { label: "Margin", value: margin, suffix: "%" },
+    { label: "ROAS", value: roas, suffix: "x" },
+    { label: "Daily Profit", value: dailyProfit, prefix: currency }
   ];
 
   // SAFE counting animation hook
@@ -109,7 +94,7 @@ export default function DropshipCalculator() {
 
     useEffect(() => {
       let start = 0;
-      const duration = 800;
+      const duration = 500;
       const stepTime = 16;
       const steps = duration / stepTime;
       const increment = target / steps;
@@ -152,13 +137,11 @@ export default function DropshipCalculator() {
     price: totalBaseCost ? (totalBaseCost / (1 - m / 100)).toFixed(2) : 0
   }));
 
-  const chartData = profit
-    ? [
-        { name: "Cost", value: totalBaseCost },
-        { name: "Selling", value: Number(sellingPrice) },
-        { name: "Profit", value: Number(profit) }
-      ]
-    : [];
+  const chartData = [
+    { name: "Cost", value: totalBaseCost },
+    { name: "Selling", value: Number(sellingPrice) || 0 },
+    { name: "Profit", value: profit }
+  ];
 
   return (
     <div style={{ minHeight: "100vh", padding: 30, ...theme }}>
@@ -169,13 +152,11 @@ export default function DropshipCalculator() {
       </div>
 
       {/* STAT CARDS */}
-      {profit !== null && (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(140px,1fr))", gap: 16, marginBottom: 20 }}>
-          {stats.map((s) => (
-            <CountCard key={s.label} s={s} />
-          ))}
-        </div>
-      )}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(140px,1fr))", gap: 16, marginBottom: 20 }}>
+        {stats.map((s) => (
+          <CountCard key={s.label} s={s} />
+        ))}
+      </div>
 
       {/* MAIN GLASS CARD */}
       <div style={{ ...glassCard }} onMouseEnter={liftHover} onMouseLeave={liftLeave}>
@@ -219,10 +200,6 @@ export default function DropshipCalculator() {
                 <input type="number" value={val} placeholder="Enter" onChange={(e) => set(e.target.value)} style={input} />
               </div>
             ))}
-
-            <button onClick={calculateProfit} style={{ ...input, background: "#22c55e", color: "white", cursor: "pointer" }}>
-              Calculate Profit
-            </button>
           </>
         )}
 
@@ -236,7 +213,7 @@ export default function DropshipCalculator() {
         )}
 
         {/* GRAPH */}
-        {activeTab === "graph" && profit !== null && (
+        {activeTab === "graph" && (
           <div style={{ height: 260 }}>
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={chartData}>
