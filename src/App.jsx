@@ -2,16 +2,19 @@ import React, { useState, useEffect } from "react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 
 export default function DropshipCalculator() {
+  const currencies = ["₹", "$", "AED", "€", "£", "¥", "₩", "₽"];
+
   const [currency, setCurrency] = useState("₹");
   const [darkMode, setDarkMode] = useState(false);
   const [activeTab, setActiveTab] = useState("profit");
 
-  const [sellingPrice, setSellingPrice] = useState(599);
-  const [productCost, setProductCost] = useState(120);
+  // DEFAULT VALUES → all ZERO as requested
+  const [sellingPrice, setSellingPrice] = useState(0);
+  const [productCost, setProductCost] = useState(0);
   const [shippingCost, setShippingCost] = useState(0);
   const [fees, setFees] = useState(0);
   const [adsCost, setAdsCost] = useState(0);
-  const [ordersPerDay, setOrdersPerDay] = useState(1);
+  const [ordersPerDay, setOrdersPerDay] = useState(0);
 
   const [profit, setProfit] = useState(null);
   const [margin, setMargin] = useState(null);
@@ -21,17 +24,20 @@ export default function DropshipCalculator() {
 
   useEffect(() => {
     const saved = localStorage.getItem("dropship-data");
-    if (saved) {
-      const d = JSON.parse(saved);
-      setSellingPrice(d.sellingPrice);
-      setProductCost(d.productCost);
-      setShippingCost(d.shippingCost);
-      setFees(d.fees);
-      setAdsCost(d.adsCost);
-      setOrdersPerDay(d.ordersPerDay);
-      setCurrency(d.currency);
-      setDarkMode(d.darkMode);
-    }
+
+    // If NO saved data → keep everything at ZERO (true default)
+    if (!saved) return;
+
+    const d = JSON.parse(saved);
+
+    setSellingPrice(d.sellingPrice ?? 0);
+    setProductCost(d.productCost ?? 0);
+    setShippingCost(d.shippingCost ?? 0);
+    setFees(d.fees ?? 0);
+    setAdsCost(d.adsCost ?? 0);
+    setOrdersPerDay(d.ordersPerDay ?? 0);
+    setCurrency(d.currency ?? "₹");
+    setDarkMode(d.darkMode ?? false);
   }, []);
 
   const saveData = () => {
@@ -59,8 +65,8 @@ export default function DropshipCalculator() {
       Number(adsCost);
 
     const net = Number(sellingPrice) - total;
-    const m = (net / Number(sellingPrice)) * 100;
-    const r = Number(sellingPrice) / Number(adsCost || 1);
+    const m = sellingPrice ? (net / Number(sellingPrice)) * 100 : 0;
+    const r = adsCost ? Number(sellingPrice) / Number(adsCost) : 0;
 
     setProfit(net.toFixed(2));
     setMargin(m.toFixed(2));
@@ -77,7 +83,7 @@ export default function DropshipCalculator() {
     background: darkMode ? "#020617" : "white",
     padding: 28,
     borderRadius: 20,
-    maxWidth: 600,
+    maxWidth: 620,
     margin: "40px auto",
     boxShadow: "0 20px 40px rgba(0,0,0,0.12)",
     border: "1px solid #22c55e33"
@@ -121,7 +127,7 @@ export default function DropshipCalculator() {
 
   const suggestedPrices = [20, 30, 50].map((m) => ({
     margin: m,
-    price: totalBaseCost ? (totalBaseCost / (1 - m / 100)).toFixed(0) : 0
+    price: totalBaseCost ? (totalBaseCost / (1 - m / 100)).toFixed(2) : 0
   }));
 
   const chartData = profit
@@ -146,6 +152,7 @@ export default function DropshipCalculator() {
           <button style={tabBtn("profit")} onClick={() => setActiveTab("profit")}>Profit</button>
           <button style={tabBtn("suggest")} onClick={() => setActiveTab("suggest")}>Suggested Prices</button>
           <button style={tabBtn("graph")} onClick={() => setActiveTab("graph")}>Graph</button>
+          <button style={tabBtn("currency")} onClick={() => setActiveTab("currency")}>Currency</button>
         </div>
 
         {/* PROFIT TAB */}
@@ -160,14 +167,14 @@ export default function DropshipCalculator() {
               ["Orders Per Day", ordersPerDay, setOrdersPerDay]
             ].map(([label, val, set]) => (
               <div key={label}>
-                <label style={{ fontWeight: 600 }}>{label}</label>
+                <label style={{ fontWeight: 600 }}>{label} ({currency})</label>
                 <input type="number" value={val} onChange={(e) => set(e.target.value)} style={input} />
               </div>
             ))}
 
             <button onClick={calculateProfit} style={greenBtn}>Calculate Profit</button>
 
-            {profit && (
+            {profit !== null && (
               <div style={{ marginTop: 18, lineHeight: 1.8 }}>
                 <p><strong>Net Profit:</strong> {currency}{profit}</p>
                 <p><strong>Margin:</strong> {margin}%</p>
@@ -192,7 +199,7 @@ export default function DropshipCalculator() {
         )}
 
         {/* GRAPH TAB */}
-        {activeTab === "graph" && profit && (
+        {activeTab === "graph" && profit !== null && (
           <div style={{ height: 300, marginTop: 20 }}>
             <h3>Profit Graph</h3>
             <ResponsiveContainer width="100%" height="100%">
@@ -203,6 +210,31 @@ export default function DropshipCalculator() {
                 <Line type="monotone" dataKey="value" stroke="#22c55e" strokeWidth={3} />
               </LineChart>
             </ResponsiveContainer>
+          </div>
+        )}
+
+        {/* CURRENCY TAB */}
+        {activeTab === "currency" && (
+          <div style={{ marginTop: 20 }}>
+            <h3>Select Currency</h3>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+              {currencies.map((c) => (
+                <button
+                  key={c}
+                  onClick={() => setCurrency(c)}
+                  style={{
+                    padding: "8px 14px",
+                    borderRadius: 10,
+                    border: "1px solid #22c55e",
+                    background: currency === c ? "#22c55e" : "transparent",
+                    color: currency === c ? "white" : darkMode ? "#4ade80" : "#065f46",
+                    cursor: "pointer"
+                  }}
+                >
+                  {c}
+                </button>
+              ))}
+            </div>
           </div>
         )}
       </div>
