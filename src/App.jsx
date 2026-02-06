@@ -38,23 +38,6 @@ export default function DropshipCalculator() {
     setDarkMode(d.darkMode ?? false);
   }, []);
 
-  const saveData = () => {
-    localStorage.setItem(
-      "dropship-data",
-      JSON.stringify({
-        sellingPrice,
-        productCost,
-        shippingCost,
-        fees,
-        adsCost,
-        ordersPerDay,
-        currency,
-        darkMode
-      })
-    );
-    alert("Saved 💾");
-  };
-
   const calculateProfit = () => {
     const total =
       Number(productCost) +
@@ -74,18 +57,30 @@ export default function DropshipCalculator() {
   };
 
   const theme = darkMode
-    ? { background: "#0f172a", color: "white" }
+    ? { background: "#020617", color: "white" }
     : { background: "linear-gradient(135deg,#ecfdf5,#d1fae5)", color: "#064e3b" };
 
-  const card = {
-    background: darkMode ? "#020617" : "white",
-    padding: 28,
+  const glassCard = {
+    background: darkMode
+      ? "rgba(15,23,42,0.7)"
+      : "rgba(255,255,255,0.6)",
+    backdropFilter: "blur(14px)",
+    WebkitBackdropFilter: "blur(14px)",
+    border: "1px solid rgba(255,255,255,0.2)",
     borderRadius: 20,
-    maxWidth: 620,
-    margin: "40px auto",
-    boxShadow: "0 10px 25px rgba(0,0,0,0.12)",
-    border: "1px solid #22c55e33",
-    transition: "transform 0.35s cubic-bezier(.2,.8,.2,1), box-shadow 0.35s cubic-bezier(.2,.8,.2,1)"
+    padding: 24,
+    transition: "all 0.35s ease",
+    boxShadow: "0 10px 30px rgba(0,0,0,0.15)"
+  };
+
+  const liftHover = (e) => {
+    e.currentTarget.style.transform = "translateY(-8px) scale(1.02)";
+    e.currentTarget.style.boxShadow = "0 25px 60px rgba(0,0,0,0.25)";
+  };
+
+  const liftLeave = (e) => {
+    e.currentTarget.style.transform = "translateY(0) scale(1)";
+    e.currentTarget.style.boxShadow = "0 10px 30px rgba(0,0,0,0.15)";
   };
 
   const input = {
@@ -94,35 +89,20 @@ export default function DropshipCalculator() {
     marginTop: 6,
     marginBottom: 14,
     borderRadius: 10,
-    border: "1px solid #22c55e55",
-    outline: "none",
-    transition: "all 0.2s ease"
+    border: "1px solid #22c55e55"
   };
 
-  const greenBtn = {
-    background: "#22c55e",
-    color: "white",
-    border: "none",
-    padding: "12px 16px",
-    borderRadius: 12,
-    cursor: "pointer",
-    fontWeight: "bold",
-    width: "100%",
-    marginTop: 8,
-    transition: "transform 0.15s ease, box-shadow 0.15s ease"
+  const statCard = {
+    ...glassCard,
+    textAlign: "center",
+    cursor: "default"
   };
 
-  const tabBtn = (tab) => ({
-    padding: "8px 14px",
-    borderRadius: 10,
-    border: "1px solid #22c55e",
-    background: activeTab === tab ? "#22c55e" : "transparent",
-    color: activeTab === tab ? "white" : darkMode ? "#4ade80" : "#065f46",
-    cursor: "pointer",
-    marginRight: 8,
-    marginBottom: 12,
-    transition: "all 0.2s ease"
-  });
+  const stats = [
+    { label: "Profit", value: profit, prefix: currency },
+    { label: "Margin", value: margin, suffix: "%" },
+    { label: "ROAS", value: roas, suffix: "x" }
+  ];
 
   const totalBaseCost =
     Number(productCost) + Number(shippingCost) + Number(fees) + Number(adsCost);
@@ -141,41 +121,49 @@ export default function DropshipCalculator() {
     : [];
 
   return (
-    <div style={{ minHeight: "100vh", padding: 20, ...theme }}>
-      <div
-        style={card}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.transform = "translateY(-10px) scale(1.01)";
-          e.currentTarget.style.boxShadow = "0 25px 60px rgba(0,0,0,0.18)";
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.transform = "translateY(0) scale(1)";
-          e.currentTarget.style.boxShadow = "0 10px 25px rgba(0,0,0,0.12)";
-        }}
-      >
-        {/* Header */}
-        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
-          <img
-            src="/logo.png"
-            alt="logo"
-            style={{ width: 40, height: 40, transition: "transform 0.3s" }}
-            onMouseEnter={(e) => (e.currentTarget.style.transform = "rotate(10deg) scale(1.1)")}
-            onMouseLeave={(e) => (e.currentTarget.style.transform = "rotate(0) scale(1)")}
-          />
-          <h1 style={{ color: "#16a34a" }}>Dropship Profit Calculator</h1>
-        </div>
+    <div style={{ minHeight: "100vh", padding: 30, ...theme }}>
+      {/* HEADER */}
+      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
+        <img src="/logo.png" alt="logo" style={{ width: 42 }} />
+        <h1 style={{ color: "#22c55e" }}>Dropship Profit Calculator</h1>
+      </div>
 
-        {/* Tabs */}
-        <div>
+      {/* STAT CARDS */}
+      {profit !== null && (
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(140px,1fr))", gap: 16, marginBottom: 20 }}>
+          {stats.map((s) => (
+            <div key={s.label} style={statCard} onMouseEnter={liftHover} onMouseLeave={liftLeave}>
+              <div style={{ fontSize: 14, opacity: 0.7 }}>{s.label}</div>
+              <div style={{ fontSize: 22, fontWeight: "bold", marginTop: 6 }}>
+                {s.prefix}{s.value}{s.suffix}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* MAIN GLASS CARD */}
+      <div style={{ ...glassCard }} onMouseEnter={liftHover} onMouseLeave={liftLeave}>
+
+        {/* TABS */}
+        <div style={{ marginBottom: 16 }}>
           {["profit", "suggest", "graph", "currency"].map((t) => (
-            <button key={t} style={tabBtn(t)} onClick={() => setActiveTab(t)}>
-              {t === "profit"
-                ? "Profit"
-                : t === "suggest"
-                ? "Suggested Prices"
-                : t === "graph"
-                ? "Graph"
-                : "Currency"}
+            <button
+              key={t}
+              onClick={() => setActiveTab(t)}
+              onMouseEnter={liftHover}
+              onMouseLeave={liftLeave}
+              style={{
+                marginRight: 8,
+                padding: "8px 14px",
+                borderRadius: 10,
+                border: "1px solid #22c55e",
+                background: activeTab === t ? "#22c55e" : "transparent",
+                color: activeTab === t ? "white" : "inherit",
+                transition: "all 0.25s ease"
+              }}
+            >
+              {t === "profit" ? "Profit" : t === "suggest" ? "Suggested Prices" : t === "graph" ? "Graph" : "Currency"}
             </button>
           ))}
         </div>
@@ -186,60 +174,35 @@ export default function DropshipCalculator() {
             {[
               ["Selling Price", sellingPrice, setSellingPrice],
               ["Product Cost", productCost, setProductCost],
-              ["Shipping Charges", shippingCost, setShippingCost],
-              ["Gateway Fees", fees, setFees],
-              ["Ad Cost / Order", adsCost, setAdsCost],
-              ["Orders Per Day", ordersPerDay, setOrdersPerDay]
+              ["Shipping", shippingCost, setShippingCost],
+              ["Fees", fees, setFees],
+              ["Ad Cost", adsCost, setAdsCost],
+              ["Orders/Day", ordersPerDay, setOrdersPerDay]
             ].map(([label, val, set]) => (
-              <div key={label} style={{ animation: "fadeIn 0.4s ease" }}>
-                <label style={{ fontWeight: 600 }}>{label} ({currency})</label>
-                <input
-                  type="number"
-                  value={val}
-                  placeholder="Enter amount"
-                  onChange={(e) => set(e.target.value === "" ? "" : Number(e.target.value))}
-                  style={input}
-                />
+              <div key={label}>
+                <label>{label} ({currency})</label>
+                <input type="number" value={val} placeholder="Enter" onChange={(e) => set(e.target.value)} style={input} />
               </div>
             ))}
 
-            <button
-              onClick={calculateProfit}
-              style={greenBtn}
-              onMouseDown={(e) => (e.currentTarget.style.transform = "scale(0.97)")}
-              onMouseUp={(e) => (e.currentTarget.style.transform = "scale(1)")}
-            >
+            <button onClick={calculateProfit} style={{ ...input, background: "#22c55e", color: "white", cursor: "pointer" }}>
               Calculate Profit
             </button>
-
-            {profit !== null && (
-              <div style={{ marginTop: 18, lineHeight: 1.8, animation: "fadeIn 0.5s ease" }}>
-                <p><strong>Net Profit:</strong> {currency}{profit}</p>
-                <p><strong>Margin:</strong> {margin}%</p>
-                <p><strong>Break-even ROAS:</strong> {roas}x</p>
-                <p><strong>Daily Profit:</strong> {currency}{dailyProfit}</p>
-                <p><strong>Monthly Profit:</strong> {currency}{monthlyProfit}</p>
-              </div>
-            )}
           </>
         )}
 
-        {/* SUGGESTED TAB */}
+        {/* SUGGESTED */}
         {activeTab === "suggest" && (
-          <div style={{ marginTop: 20, animation: "fadeIn 0.4s ease" }}>
-            <h3>Recommended Selling Prices</h3>
+          <div>
             {suggestedPrices.map((s) => (
-              <p key={s.margin}>
-                For <strong>{s.margin}%</strong> margin → <strong>{currency}{s.price}</strong>
-              </p>
+              <p key={s.margin}>For {s.margin}% → <b>{currency}{s.price}</b></p>
             ))}
           </div>
         )}
 
-        {/* GRAPH TAB */}
+        {/* GRAPH */}
         {activeTab === "graph" && profit !== null && (
-          <div style={{ height: 300, marginTop: 20, animation: "fadeIn 0.4s ease" }}>
-            <h3>Profit Graph</h3>
+          <div style={{ height: 260 }}>
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={chartData}>
                 <XAxis dataKey="name" />
@@ -251,35 +214,15 @@ export default function DropshipCalculator() {
           </div>
         )}
 
-        {/* CURRENCY TAB */}
+        {/* CURRENCY */}
         {activeTab === "currency" && (
-          <div style={{ marginTop: 20, animation: "fadeIn 0.4s ease" }}>
-            <h3>Select Currency</h3>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
-              {currencies.map((c) => (
-                <button
-                  key={c}
-                  onClick={() => setCurrency(c)}
-                  style={{
-                    padding: "8px 14px",
-                    borderRadius: 10,
-                    border: "1px solid #22c55e",
-                    background: currency === c ? "#22c55e" : "transparent",
-                    color: currency === c ? "white" : darkMode ? "#4ade80" : "#065f46",
-                    cursor: "pointer",
-                    transition: "all 0.2s ease"
-                  }}
-                >
-                  {c}
-                </button>
-              ))}
-            </div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+            {currencies.map((c) => (
+              <button key={c} onClick={() => setCurrency(c)} style={{ ...input, width: "auto", cursor: "pointer" }}>{c}</button>
+            ))}
           </div>
         )}
       </div>
-
-      {/* Simple fade animation */}
-      <style>{`@keyframes fadeIn { from {opacity:0; transform:translateY(6px);} to {opacity:1; transform:translateY(0);} }`}</style>
     </div>
   );
 }
