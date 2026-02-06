@@ -20,10 +20,10 @@ export default function DropshipCalculator() {
   const [dailyProfit, setDailyProfit] = useState(null);
   const [monthlyProfit, setMonthlyProfit] = useState(null);
   const [chartData, setChartData] = useState([]);
-
-  useEffect(() => {
     const saved = localStorage.getItem("dropship-data");
     if (saved) {
+
+  useEffect(() => {
       const d = JSON.parse(saved);
       setSellingPrice(d.sellingPrice);
       setProductCost(d.productCost);
@@ -83,9 +83,7 @@ export default function DropshipCalculator() {
 
     const data = [];
     for (let i = 0; i <= Number(sellingPrice); i += Math.max(10, sellingPrice / 10)) {
-      const p =
-        Number(sellingPrice) -
-        (Number(productCost) + Number(shippingCost) + Number(fees) + i);
+      const p = Number(sellingPrice) - (Number(productCost) + Number(shippingCost) + Number(fees) + i);
       data.push({ adCost: Math.round(i), profit: Math.round(p) });
     }
 
@@ -97,11 +95,7 @@ export default function DropshipCalculator() {
     setMonthlyProfit(monthProfit.toFixed(2));
   };
 
-  const totalBaseCost =
-    Number(productCost) +
-    Number(shippingCost) +
-    Number(fees) +
-    Number(adsCost);
+  const totalBaseCost = Number(productCost) + Number(shippingCost) + Number(fees) + Number(adsCost);
 
   const suggestedPrices = [20, 30, 50].map((m) => {
     const price = totalBaseCost / (1 - m / 100 || 1);
@@ -110,78 +104,69 @@ export default function DropshipCalculator() {
 
   const currencies = ["₹", "$", "AED"];
 
-  const cardBase = darkMode
-    ? "bg-slate-800 text-white border border-slate-700"
-    : "bg-white";
+  const themeStyles = darkMode
+    ? { background: "#0f172a", color: "#ffffff" }
+    : { background: "#f1f5f9", color: "#0f172a" };
+
+  const cardStyle = darkMode
+    ? { background: "#1e293b", border: "1px solid #334155" }
+    : { background: "#ffffff", border: "1px solid #e2e8f0" };
+
+  const inputStyle = {
+    padding: "10px",
+    borderRadius: "8px",
+    border: "1px solid #cbd5e1",
+    width: "100%",
+    marginTop: "4px"
+  };
+
+  const buttonGreen = {
+    background: "#16a34a",
+    color: "white",
+    border: "none",
+    padding: "12px 16px",
+    borderRadius: "10px",
+    cursor: "pointer",
+    fontWeight: "600"
+  };
 
   return (
-    <div
-      className={`min-h-screen flex items-center justify-center p-6 transition-colors ${
-        darkMode
-          ? "bg-slate-900 text-white"
-          : "bg-gradient-to-br from-slate-50 to-slate-200"
-      }`}
-    >
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="w-full max-w-2xl space-y-6"
-      >
+    <div style={{ minHeight: "100vh", padding: 24, ...themeStyles }}>
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ maxWidth: 900, margin: "0 auto" }}>
         {/* Header */}
-        <div className={`rounded-3xl shadow-2xl p-6 text-center space-y-4 ${cardBase}`}>
-          <h1 className="text-3xl font-bold text-green-500">
-            Dropship Profit Calculator
-          </h1>
-          <p className="text-sm opacity-70">
-            Estimate profit, margins, and break-even performance
-          </p>
+        <div style={{ ...cardStyle, borderRadius: 20, padding: 24, marginBottom: 20, textAlign: "center" }}>
+          <h1 style={{ color: "#22c55e" }}>Dropship Profit Calculator</h1>
+          <p style={{ opacity: 0.7 }}>Estimate profit, margins, and break‑even performance</p>
 
           {/* Controls */}
-          <div className="flex items-center justify-center gap-4 flex-wrap">
-            {/* Dark Mode Switch */}
-            <label className="flex items-center gap-2 cursor-pointer">
-              🌙
-              <div
-                className={`w-10 h-5 flex items-center rounded-full p-1 transition-colors ${
-                  darkMode ? "bg-green-500" : "bg-gray-400"
-                }`}
-                onClick={() => setDarkMode(!darkMode)}
-              >
-                <div
-                  className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform ${
-                    darkMode ? "translate-x-5" : "translate-x-0"
-                  }`}
-                />
-              </div>
-            </label>
-
+          <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap", marginTop: 10 }}>
+            <button onClick={() => setDarkMode(!darkMode)}>{darkMode ? "Light" : "Dark"} Mode</button>
             <button onClick={saveData}>💾 Save</button>
             <button onClick={loadData}>📂 Load</button>
           </div>
 
           {/* Currency */}
-          <div className="flex justify-center gap-2">
+          <div style={{ marginTop: 10 }}>
             {currencies.map((c) => (
-              <button key={c} onClick={() => setCurrency(c)}>
-                {c}
-              </button>
+              <button key={c} onClick={() => setCurrency(c)} style={{ margin: 4 }}>{c}</button>
             ))}
           </div>
 
           {/* Tabs */}
-          <div className="flex justify-center gap-2">
-            {["profit", "suggest", "graph"].map((t) => (
-              <button key={t} onClick={() => setActiveTab(t)}>
-                {t}
-              </button>
+          <div style={{ marginTop: 10 }}>
+            {[
+              { id: "profit", label: "Profit" },
+              { id: "suggest", label: "Suggested Prices" },
+              { id: "graph", label: "Graph" }
+            ].map((t) => (
+              <button key={t.id} onClick={() => setActiveTab(t.id)} style={{ margin: 4 }}>{t.label}</button>
             ))}
           </div>
         </div>
 
         {/* Profit Tab */}
         {activeTab === "profit" && (
-          <div className={`rounded-3xl shadow-xl p-8 space-y-6 ${cardBase}`}>
+          <div style={{ ...cardStyle, borderRadius: 20, padding: 24 }}>
             {[
               ["Selling Price", sellingPrice, setSellingPrice],
               ["Product Cost", productCost, setProductCost],
@@ -190,23 +175,19 @@ export default function DropshipCalculator() {
               ["Ad Cost / Order", adsCost, setAdsCost],
               ["Orders Per Day", ordersPerDay, setOrdersPerDay]
             ].map(([label, value, setter]) => (
-              <div key={label}>
+              <div key={label} style={{ marginBottom: 12 }}>
                 <label>{label}</label>
-                <input
-                  type="number"
-                  value={value}
-                  onChange={(e) => setter(e.target.value)}
-                />
+                <input type="number" value={value} onChange={(e) => setter(e.target.value)} style={inputStyle} />
               </div>
             ))}
 
-            <button onClick={calculateProfit}>Calculate Profit</button>
+            <button onClick={calculateProfit} style={{ ...buttonGreen, width: "100%" }}>Calculate Profit</button>
 
             {profit !== null && (
-              <div>
+              <div style={{ marginTop: 16 }}>
                 <p>Net Profit: {currency}{profit}</p>
                 <p>Margin: {margin}%</p>
-                <p>Break-even ROAS: {roas}x</p>
+                <p>Break‑even ROAS: {roas}x</p>
                 <p>Daily Profit: {currency}{dailyProfit}</p>
                 <p>Monthly Profit: {currency}{monthlyProfit}</p>
               </div>
@@ -214,20 +195,18 @@ export default function DropshipCalculator() {
           </div>
         )}
 
-        {/* Suggested Prices */}
+        {/* Suggested */}
         {activeTab === "suggest" && (
-          <div className={`rounded-3xl shadow-xl p-8 ${cardBase}`}>
+          <div style={{ ...cardStyle, borderRadius: 20, padding: 24 }}>
             {suggestedPrices.map((s) => (
-              <p key={s.margin}>
-                {s.margin}% → {currency}{s.price}
-              </p>
+              <p key={s.margin}>{s.margin}% → {currency}{s.price}</p>
             ))}
           </div>
         )}
 
         {/* Graph */}
         {activeTab === "graph" && chartData.length > 0 && (
-          <div className={`rounded-3xl shadow-xl p-8 ${cardBase}`}>
+          <div style={{ ...cardStyle, borderRadius: 20, padding: 24 }}>
             <ResponsiveContainer width="100%" height={250}>
               <LineChart data={chartData}>
                 <XAxis dataKey="adCost" />
